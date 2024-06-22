@@ -1,10 +1,14 @@
 package net.worldmc.townywebbridge;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.community.ssl.SslPlugin;
+import io.javalin.http.HttpResponseException;
+import net.worldmc.townywebbridge.routes.Residents;
+import net.worldmc.townywebbridge.routes.Towns;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.javalin.Javalin;
-import io.javalin.http.Context;
 
 import java.io.File;
 import java.util.List;
@@ -49,22 +53,34 @@ public final class TownyWebBridge extends JavaPlugin {
             }));
         }).start(7700);
 
-
         app.before(ctx -> {
             if (!apiKey.isEmpty()) {
                 String requestApiKey = ctx.header("apiKey");
                 if (requestApiKey == null || !requestApiKey.equals(apiKey)) {
-                    ctx.status(401).result("Unauthorized: Invalid API key");
-                }
+                    throw new HttpResponseException(401, "Unauthorized: Invalid API key");
+                };
             };
         });
 
-        app.get("/", this::handleRoot);
+        // Towns
+        // Public
+        app.get("/towns", context -> new Towns().getTowns(context)); // Gets a list of towns in the server
+        app.get("/towns/{uuid}", context -> new Towns().getTown(context)); // Gets town information
+        app.get("/towns/{uuid}/residents", context -> new Towns().getTownResidents(context)); // Gets a list of residents in a town
+
+        // Authenticated with session and permissions
+        app.post("/towns/create", context -> new Towns().createTown(context)); // Creates a new town
+        app.post("/towns/{uuid}/residents", context -> context.status(200)); // Joins a town
+        app.get("/towns/{uuid}/join-requests", context -> context.status(200)); // Gets a list of join requests for a town
+        app.post("/towns/{uuid}/join-requests", context -> context.status(200)); // Accepts town join requests, batch if no resident UUID specified
+        app.delete("/towns/{uuid}/join-requests", context -> context.status(200)); // Deletes town join requests, batch if no resident UUID specified
+
+        // Residents
+        // Public
+        app.get("/residents", context -> new Residents().getResidents(context));
+        app.get("/residents/{uuid}", context -> new Residents().getResident(context));
+        app.get("/residents/{uuid}/friends", context -> new Residents().getResidentFriends(context));
 
         getLogger().info("JavalinPlugin is enabled");
-    }
-
-    private void handleRoot(Context ctx) {
-        ctx.result("Worked or something");
     }
 }
