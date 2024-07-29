@@ -1,23 +1,16 @@
-package net.worldmc.townywebbridge;
+package net.worldmc.townyweb;
 
-import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.object.Town;
-import io.javalin.community.ssl.SslPlugin;
 import io.javalin.http.HttpResponseException;
-import net.worldmc.townywebbridge.routes.Residents;
-import net.worldmc.townywebbridge.routes.Towns;
+import net.worldmc.townyweb.routes.Residents;
+import net.worldmc.townyweb.routes.Towns;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.javalin.Javalin;
 
-import java.io.File;
-import java.util.List;
-
-public final class TownyWebBridge extends JavaPlugin {
+public final class TownyWeb extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
         saveDefaultConfig();
         startWebServer();
     }
@@ -25,33 +18,12 @@ public final class TownyWebBridge extends JavaPlugin {
     private void startWebServer() {
         FileConfiguration pluginConfig = getConfig();
         int port = pluginConfig.getInt("port", 7700);
-        String keyStorePath = pluginConfig.getString("tls.keyStore", "keystore.jks");
-        String keyStorePassword = pluginConfig.getString("tls.keyStorePassword", "");
         String apiKey = pluginConfig.getString("apiKey", "");
-        List<String> corsHosts = pluginConfig.getStringList("cors");
-
-        final String fullKeyStorePath = getDataFolder().getAbsolutePath() + File.separator + keyStorePath;
-
-        SslPlugin sslPlugin = new SslPlugin(conf -> {
-            conf.keystoreFromPath(fullKeyStorePath, keyStorePassword);
-            conf.http2 = false;
-            conf.insecure = false;
-            conf.secure = true;
-            conf.securePort = port;
-            conf.sniHostCheck = false;
-        });
 
         Javalin app = Javalin.create(config -> {
-            config.registerPlugin(sslPlugin);
             config.showJavalinBanner = false;
-            config.bundledPlugins.enableCors(cors -> cors.addRule(corsRule -> {
-                if (corsHosts.contains("*")) {
-                  corsRule.anyHost();
-                } else {
-                    corsHosts.forEach(corsRule::allowHost);
-                };
-            }));
-        }).start(7700);
+            config.useVirtualThreads = true;
+        }).start(port);
 
         app.before(ctx -> {
             if (!apiKey.isEmpty()) {
@@ -80,7 +52,5 @@ public final class TownyWebBridge extends JavaPlugin {
         app.get("/residents", context -> new Residents().getResidents(context));
         app.get("/residents/{uuid}", context -> new Residents().getResident(context));
         app.get("/residents/{uuid}/friends", context -> new Residents().getResidentFriends(context));
-
-        getLogger().info("JavalinPlugin is enabled");
     }
 }

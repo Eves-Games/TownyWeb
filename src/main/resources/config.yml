@@ -1,8 +1,2 @@
 port: 7700
 apiKey: ""
-tls:
-  keyStore: keystore.jks
-  keyStorePassword: "URzN8E6d4UbCkUjZ9dYHRQ=="
-cors:
-  - "*"
-  - "https://worldmc.net"
