@@ -1,6 +1,7 @@
 package net.worldmc.townyweb;
 
 import io.javalin.http.HttpResponseException;
+import net.worldmc.townyweb.routes.Nations;
 import net.worldmc.townyweb.routes.Residents;
 import net.worldmc.townyweb.routes.Towns;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -34,23 +35,23 @@ public final class TownyWeb extends JavaPlugin {
             };
         });
 
-        // Towns
-        // Public
-        app.get("/towns", context -> new Towns().getTowns(context)); // Gets a list of towns in the server
-        app.get("/towns/{uuid}", context -> new Towns().getTown(context)); // Gets town information
-        app.get("/towns/{uuid}/residents", context -> new Towns().getTownResidents(context)); // Gets a list of residents in a town
+        Nations nations = new Nations();
+        Towns towns = new Towns();
+        Residents residents = new Residents();
 
-        // Authenticated with session and permissions
-        app.post("/towns/create", context -> new Towns().createTown(context)); // Creates a new town
-        app.post("/towns/{uuid}/residents", context -> context.status(200)); // Joins a town
-        app.get("/towns/{uuid}/join-requests", context -> context.status(200)); // Gets a list of join requests for a town
-        app.post("/towns/{uuid}/join-requests", context -> context.status(200)); // Accepts town join requests, batch if no resident UUID specified
-        app.delete("/towns/{uuid}/join-requests", context -> context.status(200)); // Deletes town join requests, batch if no resident UUID specified
+        // Nations
+        app.get("/nations", nations::getNations);
+        app.get("/nation/{uuid}", nations::getNation);
+        app.get("/nation/{uuid}/towns", nations::getNationTowns);
+
+        // Towns
+        app.get("/towns", towns::getTowns);
+        app.get("/towns/{uuid}", towns::getTown);
+        app.get("/towns/{uuid}/residents", towns::getTownResidents);
 
         // Residents
-        // Public
-        app.get("/residents", context -> new Residents().getResidents(context));
-        app.get("/residents/{uuid}", context -> new Residents().getResident(context));
-        app.get("/residents/{uuid}/friends", context -> new Residents().getResidentFriends(context));
+        app.get("/residents", residents::getResidents);
+        app.get("/residents/{uuid}", residents::getResident);
+        app.get("/residents/{uuid}/friends", residents::getResidentFriends);
     }
 }
