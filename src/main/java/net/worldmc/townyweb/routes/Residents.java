@@ -1,13 +1,11 @@
 package net.worldmc.townyweb.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
-import com.palmergames.bukkit.towny.object.TownyObject;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
-import net.worldmc.townyweb.adapters.TownyEntityAdapter;
+import net.worldmc.townyweb.adapters.SerializerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,16 +19,10 @@ public class Residents {
     private final int PAGE_SIZE = 10;
 
     public Residents() {
-        this.fullObjectMapper = new ObjectMapper();
-        this.partialObjectMapper = new ObjectMapper();
+        SerializerFactory serializerFactory = new SerializerFactory();
 
-        SimpleModule fullModule = new SimpleModule();
-        fullModule.addSerializer(TownyObject.class, new TownyEntityAdapter());
-        fullObjectMapper.registerModule(fullModule);
-
-        SimpleModule partialModule = new SimpleModule();
-        partialModule.addSerializer(TownyObject.class, new TownyEntityAdapter.Partial());
-        partialObjectMapper.registerModule(partialModule);
+        this.fullObjectMapper = serializerFactory.getFullObjectMapper();
+        this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
     }
 
     private Resident getResidentByUUID(String uuidParam) {
