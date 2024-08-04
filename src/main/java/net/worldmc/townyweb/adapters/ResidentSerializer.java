@@ -8,12 +8,33 @@ import com.palmergames.bukkit.towny.object.*;
 import java.io.IOException;
 
 public class ResidentSerializer extends StdSerializer<Resident> {
+    private static final ResidentSerializer.Partial partial = new Partial();
+
     public ResidentSerializer() {
         this(null);
     }
 
     public ResidentSerializer(Class<Resident> t) {
         super(t);
+    }
+
+    public static class Partial extends StdSerializer<Resident> {
+        public Partial() {
+            this(null);
+        }
+
+        protected Partial(Class<Resident> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(Resident resident, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            gen.writeStartObject();
+            gen.writeStringField("name", resident.getName());
+            gen.writeStringField("UUID", resident.getUUID().toString());
+            gen.writeStringField("title", resident.getTitle());
+            gen.writeEndObject();
+        }
     }
 
     @Override
@@ -66,7 +87,7 @@ public class ResidentSerializer extends StdSerializer<Resident> {
 
         gen.writeArrayFieldStart("friends");
         for (Resident friend : resident.getFriends()) {
-            new PartialResidentSerializer().serialize(friend, gen, provider);
+            partial.serialize(friend, gen, provider);
         }
         gen.writeEndArray();
 
@@ -87,5 +108,11 @@ public class ResidentSerializer extends StdSerializer<Resident> {
         gen.writeNumberField("jailHours", resident.getJailHours());
         gen.writeNumberField("jailBailCost", resident.getJailBailCost());
         gen.writeEndObject();
+
+        gen.writeEndObject();
+    }
+
+    public ResidentSerializer.Partial getPartialSerializer() {
+        return partial;
     }
 }

@@ -8,43 +8,41 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 
 public class SerializerFactory {
-    private static SerializerFactory instance;
+    private static final SerializerFactory instance = new SerializerFactory();
 
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
 
-    private NationSerializer nationSerializer;
-    private TownSerializer townSerializer;
-    private ResidentSerializer residentSerializer;
-    private InviteSerializer inviteSerializer;
-
-    private PartialNationSerializer partialNationSerializer;
-    private PartialTownSerializer partialTownSerializer;
-    private PartialResidentSerializer partialResidentSerializer;
+    private final NationSerializer nationSerializer;
+    private final TownSerializer townSerializer;
+    private final ResidentSerializer residentSerializer;
+    private final InviteSerializer inviteSerializer;
 
     public SerializerFactory() {
+        this.nationSerializer = new NationSerializer();
+        this.townSerializer = new TownSerializer();
+        this.residentSerializer = new ResidentSerializer();
+        this.inviteSerializer = new InviteSerializer();
+
         this.fullObjectMapper = new ObjectMapper();
         this.partialObjectMapper = new ObjectMapper();
 
         SimpleModule fullModule = new SimpleModule();
-        fullModule.addSerializer(Nation.class, getNationSerializer());
-        fullModule.addSerializer(Town.class, getTownSerializer());
-        fullModule.addSerializer(Resident.class, getResidentSerializer());
-        fullModule.addSerializer(Invite.class, getInviteSerializer());
+        fullModule.addSerializer(Nation.class, nationSerializer);
+        fullModule.addSerializer(Town.class, townSerializer);
+        fullModule.addSerializer(Resident.class, residentSerializer);
+        fullModule.addSerializer(Invite.class, inviteSerializer);
         fullObjectMapper.registerModule(fullModule);
 
         SimpleModule partialModule = new SimpleModule();
-        partialModule.addSerializer(Nation.class, getPartialNationSerializer());
-        partialModule.addSerializer(Town.class, getPartialTownSerializer());
-        partialModule.addSerializer(Resident.class, getPartialResidentSerializer());
-        partialModule.addSerializer(Invite.class, getInviteSerializer());
+        partialModule.addSerializer(Nation.class, nationSerializer.getPartialSerializer());
+        partialModule.addSerializer(Town.class, townSerializer.getPartialSerializer());
+        partialModule.addSerializer(Resident.class, residentSerializer.getPartialSerializer());
+        partialModule.addSerializer(Invite.class, inviteSerializer);
         partialObjectMapper.registerModule(partialModule);
     }
 
     public static SerializerFactory getInstance() {
-        if (instance == null) {
-            instance = new SerializerFactory();
-        }
         return instance;
     }
 
@@ -57,51 +55,30 @@ public class SerializerFactory {
     }
 
     public NationSerializer getNationSerializer() {
-        if (nationSerializer == null) {
-            nationSerializer = new NationSerializer();
-        }
         return nationSerializer;
     }
 
     public TownSerializer getTownSerializer() {
-        if (townSerializer == null) {
-            townSerializer = new TownSerializer();
-        }
         return townSerializer;
     }
 
     public ResidentSerializer getResidentSerializer() {
-        if (residentSerializer == null) {
-            residentSerializer = new ResidentSerializer();
-        }
         return residentSerializer;
     }
 
     public InviteSerializer getInviteSerializer() {
-        if (inviteSerializer == null) {
-            inviteSerializer = new InviteSerializer();
-        }
         return inviteSerializer;
     }
 
-    public PartialNationSerializer getPartialNationSerializer() {
-        if (partialNationSerializer == null) {
-            partialNationSerializer = new PartialNationSerializer();
-        }
-        return partialNationSerializer;
+    public NationSerializer.Partial getPartialNationSerializer() {
+        return nationSerializer.getPartialSerializer();
     }
 
-    public PartialTownSerializer getPartialTownSerializer() {
-        if (partialTownSerializer == null) {
-            partialTownSerializer = new PartialTownSerializer();
-        }
-        return partialTownSerializer;
+    public TownSerializer.Partial getPartialTownSerializer() {
+        return townSerializer.getPartialSerializer();
     }
 
-    public PartialResidentSerializer getPartialResidentSerializer() {
-        if (partialResidentSerializer == null) {
-            partialResidentSerializer = new PartialResidentSerializer();
-        }
-        return partialResidentSerializer;
+    public ResidentSerializer.Partial getPartialResidentSerializer() {
+        return residentSerializer.getPartialSerializer();
     }
 }

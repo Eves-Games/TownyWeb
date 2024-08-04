@@ -8,12 +8,32 @@ import com.palmergames.bukkit.towny.object.*;
 import java.io.IOException;
 
 public class NationSerializer extends StdSerializer<Nation> {
+    private static final Partial partial = new Partial();
+
     public NationSerializer() {
         this(null);
     }
 
     public NationSerializer(Class<Nation> t) {
         super(t);
+    }
+
+    public static class Partial extends StdSerializer<Nation> {
+        public Partial() {
+            this(null);
+        }
+
+        protected Partial(Class<Nation> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(Nation nation, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            gen.writeStartObject();
+            gen.writeStringField("name", nation.getName());
+            gen.writeStringField("UUID", nation.getUUID().toString());
+            gen.writeEndObject();
+        }
     }
 
     @Override
@@ -54,17 +74,20 @@ public class NationSerializer extends StdSerializer<Nation> {
 
         gen.writeArrayFieldStart("allies");
         for (Nation ally : nation.getAllies()) {
-            SerializerFactory.getInstance().getPartialNationSerializer().serialize(ally, gen, provider);
+            partial.serialize(ally, gen, provider);
         }
         gen.writeEndArray();
 
         gen.writeArrayFieldStart("enemies");
         for (Nation enemy : nation.getEnemies()) {
-            SerializerFactory.getInstance().getPartialNationSerializer().serialize(enemy, gen, provider);
+            partial.serialize(enemy, gen, provider);
         }
         gen.writeEndArray();
 
         gen.writeEndObject();
     }
-}
 
+    public NationSerializer.Partial getPartialSerializer() {
+        return partial;
+    }
+}

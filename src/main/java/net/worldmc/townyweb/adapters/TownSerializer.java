@@ -8,12 +8,32 @@ import com.palmergames.bukkit.towny.object.*;
 import java.io.IOException;
 
 public class TownSerializer extends StdSerializer<Town> {
+    private static final TownSerializer.Partial partial = new TownSerializer.Partial();
+
     public TownSerializer() {
         this(null);
     }
 
     public TownSerializer(Class<Town> t) {
         super(t);
+    }
+
+    public static class Partial extends StdSerializer<Town> {
+        public Partial() {
+            this(null);
+        }
+
+        protected Partial(Class<Town> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(Town town, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            gen.writeStartObject();
+            gen.writeStringField("name", town.getName());
+            gen.writeStringField("UUID", town.getUUID().toString());
+            gen.writeEndObject();
+        }
     }
 
     @Override
@@ -65,5 +85,9 @@ public class TownSerializer extends StdSerializer<Town> {
         gen.writeEndArray();
 
         gen.writeEndObject();
+    }
+
+    public TownSerializer.Partial getPartialSerializer() {
+        return partial;
     }
 }
