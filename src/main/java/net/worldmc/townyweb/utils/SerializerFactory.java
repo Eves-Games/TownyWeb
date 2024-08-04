@@ -1,4 +1,4 @@
-package net.worldmc.townyweb.adapters;
+package net.worldmc.townyweb.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -6,6 +6,10 @@ import com.palmergames.bukkit.towny.invites.Invite;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
+import net.worldmc.townyweb.adapters.InviteSerializer;
+import net.worldmc.townyweb.adapters.NationSerializer;
+import net.worldmc.townyweb.adapters.ResidentSerializer;
+import net.worldmc.townyweb.adapters.TownSerializer;
 
 public class SerializerFactory {
     private static final SerializerFactory instance = new SerializerFactory();
