@@ -2,13 +2,15 @@ package net.worldmc.townyweb.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.invites.Invite;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.inviteobjects.NationAllyNationInvite;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
 import net.worldmc.townyweb.WebServer;
-import net.worldmc.townyweb.adapters.*;
 import net.worldmc.townyweb.utils.PaginationUtil;
+import net.worldmc.townyweb.utils.SerializerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class Nations {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
+    private final PaginationUtil<Invite> invitePaginationUtil;
     private final PaginationUtil<Nation> nationPaginationUtil;
     private final PaginationUtil<Town> townPaginationUtil;
 
@@ -25,6 +28,7 @@ public class Nations {
         SerializerFactory serializerFactory = webServer.getSerializerFactory();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
+        this.invitePaginationUtil = webServer.getInvitePaginationUtil();
         this.nationPaginationUtil = webServer.getNationPaginationUtil();
         this.townPaginationUtil = webServer.getTownPaginationUtil();
     }
@@ -90,7 +94,7 @@ public class Nations {
     public void getNationRelationships(Context ctx) {
         String uuidParam = ctx.pathParam("uuid");
         Nation nation = getNationByUUID(uuidParam);
-        String type = ctx.queryParam("type");
+        String type = ctx.pathParam("relationshipType");
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
 
         List<Nation> relatedNations;
@@ -108,21 +112,19 @@ public class Nations {
         ctx.json(paginatedResult);
     }
 
-    public void getNationReceivedAllyInvites(Context ctx) {
+    public void getNationRelationshipRequests(Context ctx) {
         String uuidParam = ctx.pathParam("uuid");
         Nation nation = getNationByUUID(uuidParam);
-        ctx.json(fullObjectMapper.valueToTree(nation.getReceivedInvites()));
-    }
+        String type = ctx.pathParam("relationshipType");
+        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
 
-    public void getNationSentAllyInvites(Context ctx) {
-        String uuidParam = ctx.pathParam("uuid");
-        Nation nation = getNationByUUID(uuidParam);
-        ctx.json(fullObjectMapper.valueToTree(nation.getSentAllyInvites()));
-    }
+        if ("allies".equalsIgnoreCase(type)) {
+            Map<String, Object> paginatedResult = invitePaginationUtil.paginateList(nation.getReceivedInvites(), page);
+            paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-    public void getNationSentInvites(Context ctx) {
-        String uuidParam = ctx.pathParam("uuid");
-        Nation nation = getNationByUUID(uuidParam);
-        ctx.json(fullObjectMapper.valueToTree(nation.getSentInvites()));
+            ctx.json(paginatedResult);
+        } else {
+            throw new HttpResponseException(400, "Invalid relationship type. Must be 'allies'.");
+        }
     }
 }

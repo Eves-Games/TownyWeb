@@ -11,6 +11,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.inviteobjects.NationAllyNationInvite;
 import com.palmergames.bukkit.towny.object.inviteobjects.PlayerJoinTownInvite;
 import com.palmergames.bukkit.towny.object.inviteobjects.TownJoinNationInvite;
+import net.worldmc.townyweb.utils.SerializerFactory;
 
 import java.io.IOException;
 

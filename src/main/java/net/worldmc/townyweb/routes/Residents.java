@@ -6,7 +6,7 @@ import com.palmergames.bukkit.towny.object.Resident;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
 import net.worldmc.townyweb.WebServer;
-import net.worldmc.townyweb.adapters.SerializerFactory;
+import net.worldmc.townyweb.utils.SerializerFactory;
 import net.worldmc.townyweb.utils.PaginationUtil;
 
 import java.util.List;
