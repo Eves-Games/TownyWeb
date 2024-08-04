@@ -1,10 +1,11 @@
 package net.worldmc.townyweb;
 
+import com.palmergames.bukkit.towny.invites.Invite;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.Javalin;
-import net.worldmc.townyweb.adapters.SerializerFactory;
+import net.worldmc.townyweb.utils.SerializerFactory;
 import net.worldmc.townyweb.routes.Nations;
 import net.worldmc.townyweb.routes.Residents;
 import net.worldmc.townyweb.routes.Towns;
@@ -18,18 +19,21 @@ public class WebServer {
     private final PaginationUtil<Nation> nationPaginationUtil;
     private final PaginationUtil<Town> townPaginationUtil;
     private final PaginationUtil<Resident> residentPaginationUtil;
+    private final PaginationUtil<Invite> invitePaginationUtil;
+    private final FileConfiguration config;
 
-    public WebServer() {
+    public WebServer(TownyWeb plugin) {
+        config = plugin.getConfig();
         serializerFactory = new SerializerFactory();
         nationPaginationUtil = new PaginationUtil<>();
         townPaginationUtil = new PaginationUtil<>();
         residentPaginationUtil = new PaginationUtil<>();
+        invitePaginationUtil = new PaginationUtil<>();
     }
 
     public void start() {
-        FileConfiguration pluginConfig = getConfig();
-        int port = pluginConfig.getInt("port", 7700);
-        String apiKey = pluginConfig.getString("apiKey", "");
+        int port = config.getInt("port", 7700);
+        String apiKey = config.getString("apiKey", "");
 
         Javalin app = Javalin.create(config -> {
             config.showJavalinBanner = false;
@@ -51,9 +55,10 @@ public class WebServer {
 
         // Nations
         app.get("/nations", nations::getNations); // page and search query
-        app.get("/nation/{uuid}", nations::getNation);
-        app.get("/nation/{uuid}/towns", nations::getNationTowns);
-        app.get("/nation/{uuid}/relationships", nations::getNationRelationships); // type query (allies or enemies)
+        app.get("/nations/{uuid}", nations::getNation);
+        app.get("/nations/{uuid}/towns", nations::getNationTowns);
+        app.get("/nations/{uuid}/relationships/{relationshipType}", nations::getNationRelationships); // allies or enemies
+        app.get("/nations/{uuid}/relationships/{relationshipType}/requests", nations::getNationRelationshipRequests); // allies
 
         // Towns
         app.get("/towns", towns::getTowns); // page and search query
@@ -80,5 +85,9 @@ public class WebServer {
 
     public PaginationUtil<Resident> getResidentPaginationUtil() {
         return residentPaginationUtil;
+    }
+
+    public PaginationUtil<Invite> getInvitePaginationUtil() {
+        return invitePaginationUtil;
     }
 }
