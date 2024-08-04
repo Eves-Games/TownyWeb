@@ -6,9 +6,10 @@ import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
+import net.worldmc.townyweb.WebServer;
 import net.worldmc.townyweb.adapters.*;
+import net.worldmc.townyweb.utils.PaginationUtil;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,13 +18,15 @@ import java.util.stream.Collectors;
 public class Nations {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
-    private final int PAGE_SIZE = 10;
+    private final PaginationUtil<Nation> nationPaginationUtil;
+    private final PaginationUtil<Town> townPaginationUtil;
 
-    public Nations() {
-        SerializerFactory serializerFactory = new SerializerFactory();
-
+    public Nations(WebServer webServer) {
+        SerializerFactory serializerFactory = webServer.getSerializerFactory();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
+        this.nationPaginationUtil = webServer.getNationPaginationUtil();
+        this.townPaginationUtil = webServer.getTownPaginationUtil();
     }
 
     private Nation getNationByUUID(String uuidParam) {
@@ -66,22 +69,10 @@ public class Nations {
                     .collect(Collectors.toList());
         }
 
-        int totalResults = filteredNations.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) totalResults / PAGE_SIZE));
+        Map<String, Object> paginatedResult = nationPaginationUtil.paginateList(filteredNations, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        page = Math.max(1, Math.min(page, totalPages));
-
-        int fromIndex = (page - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalResults);
-
-        List<Nation> paginatedNations = filteredNations.subList(fromIndex, toIndex);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", partialObjectMapper.valueToTree(paginatedNations));
-        response.put("currentPage", page);
-        response.put("totalPages", totalPages);
-
-        ctx.json(response);
+        ctx.json(paginatedResult);
     }
 
     public void getNationTowns(Context ctx) {
@@ -90,22 +81,31 @@ public class Nations {
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
 
         List<Town> allTowns = nation.getTowns();
-        int totalResults = allTowns.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) totalResults / PAGE_SIZE));
+        Map<String, Object> paginatedResult = townPaginationUtil.paginateList(allTowns, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        page = Math.max(1, Math.min(page, totalPages));
+        ctx.json(paginatedResult);
+    }
 
-        int fromIndex = (page - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalResults);
+    public void getNationRelationships(Context ctx) {
+        String uuidParam = ctx.pathParam("uuid");
+        Nation nation = getNationByUUID(uuidParam);
+        String type = ctx.queryParam("type");
+        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
 
-        List<Town> paginatedTowns = allTowns.subList(fromIndex, toIndex);
+        List<Nation> relatedNations;
+        if ("allies".equalsIgnoreCase(type)) {
+            relatedNations = nation.getAllies();
+        } else if ("enemies".equalsIgnoreCase(type)) {
+            relatedNations = nation.getEnemies();
+        } else {
+            throw new HttpResponseException(400, "Invalid relationship type. Must be 'allies' or 'enemies'.");
+        }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", partialObjectMapper.valueToTree(paginatedTowns));
-        response.put("currentPage", page);
-        response.put("totalPages", totalPages);
+        Map<String, Object> paginatedResult = nationPaginationUtil.paginateList(relatedNations, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        ctx.json(response);
+        ctx.json(paginatedResult);
     }
 
     public void getNationReceivedAllyInvites(Context ctx) {

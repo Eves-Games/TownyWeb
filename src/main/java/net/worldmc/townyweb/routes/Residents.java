@@ -5,9 +5,10 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
+import net.worldmc.townyweb.WebServer;
 import net.worldmc.townyweb.adapters.SerializerFactory;
+import net.worldmc.townyweb.utils.PaginationUtil;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,13 +17,13 @@ import java.util.stream.Collectors;
 public class Residents {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
-    private final int PAGE_SIZE = 10;
+    private final PaginationUtil<Resident> residentPaginationUtil;
 
-    public Residents() {
-        SerializerFactory serializerFactory = new SerializerFactory();
-
+    public Residents(WebServer webServer) {
+        SerializerFactory serializerFactory = webServer.getSerializerFactory();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
+        this.residentPaginationUtil = webServer.getResidentPaginationUtil();
     }
 
     private Resident getResidentByUUID(String uuidParam) {
@@ -65,22 +66,10 @@ public class Residents {
                     .collect(Collectors.toList());
         }
 
-        int totalResults = filteredResidents.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) totalResults / PAGE_SIZE));
+        Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(filteredResidents, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        page = Math.max(1, Math.min(page, totalPages));
-
-        int fromIndex = (page - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalResults);
-
-        List<Resident> paginatedResidents = filteredResidents.subList(fromIndex, toIndex);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", partialObjectMapper.valueToTree(paginatedResidents));
-        response.put("currentPage", page);
-        response.put("totalPages", totalPages);
-
-        ctx.json(response);
+        ctx.json(paginatedResult);
     }
 
     public void getResidentFriends(Context ctx) {
@@ -90,21 +79,9 @@ public class Residents {
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
         List<Resident> allFriends = resident.getFriends();
 
-        int totalResults = allFriends.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) totalResults / PAGE_SIZE));
+        Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(allFriends, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        page = Math.max(1, Math.min(page, totalPages));
-
-        int fromIndex = (page - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalResults);
-
-        List<Resident> paginatedFriends = allFriends.subList(fromIndex, toIndex);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", partialObjectMapper.valueToTree(paginatedFriends));
-        response.put("currentPage", page);
-        response.put("totalPages", totalPages);
-
-        ctx.json(response);
+        ctx.json(paginatedResult);
     }
 }

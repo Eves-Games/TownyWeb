@@ -6,9 +6,10 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
+import net.worldmc.townyweb.WebServer;
 import net.worldmc.townyweb.adapters.SerializerFactory;
+import net.worldmc.townyweb.utils.PaginationUtil;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,13 +18,15 @@ import java.util.stream.Collectors;
 public class Towns {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
-    private final int PAGE_SIZE = 10;
+    private final PaginationUtil<Town> townPaginationUtil;
+    private final PaginationUtil<Resident> residentPaginationUtil;
 
-    public Towns() {
-        SerializerFactory serializerFactory = new SerializerFactory();
-
+    public Towns(WebServer webServer) {
+        SerializerFactory serializerFactory = webServer.getSerializerFactory();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
+        this.townPaginationUtil = webServer.getTownPaginationUtil();
+        this.residentPaginationUtil = webServer.getResidentPaginationUtil();
     }
 
     private Town getTownByUUID(String uuidParam) {
@@ -66,22 +69,10 @@ public class Towns {
                     .collect(Collectors.toList());
         }
 
-        int totalResults = filteredTowns.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) totalResults / PAGE_SIZE));
+        Map<String, Object> paginatedResult = townPaginationUtil.paginateList(filteredTowns, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        page = Math.max(1, Math.min(page, totalPages));
-
-        int fromIndex = (page - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalResults);
-
-        List<Town> paginatedTowns = filteredTowns.subList(fromIndex, toIndex);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", partialObjectMapper.valueToTree(paginatedTowns));
-        response.put("currentPage", page);
-        response.put("totalPages", totalPages);
-
-        ctx.json(response);
+        ctx.json(paginatedResult);
     }
 
     public void getTownResidents(Context ctx) {
@@ -91,21 +82,9 @@ public class Towns {
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
         List<Resident> allResidents = town.getResidents();
 
-        int totalResults = allResidents.size();
-        int totalPages = Math.max(1, (int) Math.ceil((double) totalResults / PAGE_SIZE));
+        Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(allResidents, page);
+        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
-        page = Math.max(1, Math.min(page, totalPages));
-
-        int fromIndex = (page - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalResults);
-
-        List<Resident> paginatedResidents = allResidents.subList(fromIndex, toIndex);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", partialObjectMapper.valueToTree(paginatedResidents));
-        response.put("currentPage", page);
-        response.put("totalPages", totalPages);
-
-        ctx.json(response);
+        ctx.json(paginatedResult);
     }
 }
