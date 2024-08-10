@@ -6,7 +6,6 @@ import com.palmergames.bukkit.towny.invites.Invite;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
-import net.worldmc.townyweb.adapters.InviteSerializer;
 import net.worldmc.townyweb.adapters.NationSerializer;
 import net.worldmc.townyweb.adapters.ResidentSerializer;
 import net.worldmc.townyweb.adapters.TownSerializer;
@@ -20,13 +19,11 @@ public class SerializerFactory {
     private final NationSerializer nationSerializer;
     private final TownSerializer townSerializer;
     private final ResidentSerializer residentSerializer;
-    private final InviteSerializer inviteSerializer;
 
     public SerializerFactory() {
-        this.nationSerializer = new NationSerializer();
-        this.townSerializer = new TownSerializer();
-        this.residentSerializer = new ResidentSerializer();
-        this.inviteSerializer = new InviteSerializer();
+        this.nationSerializer = new NationSerializer(this);
+        this.townSerializer = new TownSerializer(this);
+        this.residentSerializer = new ResidentSerializer(this);
 
         this.fullObjectMapper = new ObjectMapper();
         this.partialObjectMapper = new ObjectMapper();
@@ -35,14 +32,12 @@ public class SerializerFactory {
         fullModule.addSerializer(Nation.class, nationSerializer);
         fullModule.addSerializer(Town.class, townSerializer);
         fullModule.addSerializer(Resident.class, residentSerializer);
-        fullModule.addSerializer(Invite.class, inviteSerializer);
         fullObjectMapper.registerModule(fullModule);
 
         SimpleModule partialModule = new SimpleModule();
         partialModule.addSerializer(Nation.class, nationSerializer.getPartialSerializer());
         partialModule.addSerializer(Town.class, townSerializer.getPartialSerializer());
         partialModule.addSerializer(Resident.class, residentSerializer.getPartialSerializer());
-        partialModule.addSerializer(Invite.class, inviteSerializer);
         partialObjectMapper.registerModule(partialModule);
     }
 
@@ -56,22 +51,6 @@ public class SerializerFactory {
 
     public ObjectMapper getPartialObjectMapper() {
         return partialObjectMapper;
-    }
-
-    public NationSerializer getNationSerializer() {
-        return nationSerializer;
-    }
-
-    public TownSerializer getTownSerializer() {
-        return townSerializer;
-    }
-
-    public ResidentSerializer getResidentSerializer() {
-        return residentSerializer;
-    }
-
-    public InviteSerializer getInviteSerializer() {
-        return inviteSerializer;
     }
 
     public NationSerializer.Partial getPartialNationSerializer() {
