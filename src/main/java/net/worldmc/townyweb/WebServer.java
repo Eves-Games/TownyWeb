@@ -52,22 +52,14 @@ public class WebServer {
         Towns towns = new Towns(this);
         Residents residents = new Residents(this);
 
-        // Nations
-        app.get("/nations", nations::getNations); // page and search query
+        app.get("/nations", nations::getNations);
         app.get("/nations/{uuid}", nations::getNation);
-        app.get("/nations/{uuid}/towns", nations::getNationTowns);
-        app.get("/nations/{uuid}/relationships/{relationshipType}", nations::getNationRelationships); // allies or enemies
-        app.get("/nations/{uuid}/relationships/{relationshipType}/requests", nations::getNationRelationshipRequests); // allies
 
-        // Towns
-        app.get("/towns", towns::getTowns); // page and search query
+        app.get("/towns", towns::getTowns);
         app.get("/towns/{uuid}", towns::getTown);
-        app.get("/towns/{uuid}/residents", towns::getTownResidents);
 
-        // Residents
-        app.get("/residents", residents::getResidents); // page and search query
+        app.get("/residents", residents::getResidents);
         app.get("/residents/{uuid}", residents::getResident);
-        app.get("/residents/{uuid}/friends", residents::getResidentFriends);
     }
 
     public SerializerFactory getSerializerFactory() {
