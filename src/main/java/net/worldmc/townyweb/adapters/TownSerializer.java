@@ -9,14 +9,16 @@ import net.worldmc.townyweb.utils.SerializerFactory;
 import java.io.IOException;
 
 public class TownSerializer extends StdSerializer<Town> {
-    private static final TownSerializer.Partial partial = new TownSerializer.Partial();
+    private static final Partial partial = new Partial();
+    private final SerializerFactory serializerFactory;
 
-    public TownSerializer() {
-        this(null);
+    public TownSerializer(SerializerFactory serializerFactory) {
+        this(null, serializerFactory);
     }
 
-    public TownSerializer(Class<Town> t) {
+    public TownSerializer(Class<Town> t, SerializerFactory serializerFactory) {
         super(t);
+        this.serializerFactory = serializerFactory;
     }
 
     public static class Partial extends StdSerializer<Town> {
@@ -62,15 +64,15 @@ public class TownSerializer extends StdSerializer<Town> {
         gen.writeEndObject();
 
         gen.writeFieldName("mayor");
-        SerializerFactory.getInstance().getPartialResidentSerializer().serialize(town.getMayor(), gen, provider);
+        serializerFactory.getPartialResidentSerializer().serialize(town.getMayor(), gen, provider);
 
         Nation nation = town.getNationOrNull();
         if (nation != null) {
             gen.writeFieldName("nation");
-            SerializerFactory.getInstance().getPartialNationSerializer().serialize(nation, gen, provider);
+            serializerFactory.getPartialNationSerializer().serialize(nation, gen, provider);
         }
 
-        gen.writeNumberField("residents", town.getNumResidents());
+        gen.writeNumberField("numResidents", town.getNumResidents());
         gen.writeNumberField("trustedResidents", town.getTrustedResidents().size());
 
         gen.writeObjectFieldStart("spawn");
@@ -82,6 +84,12 @@ public class TownSerializer extends StdSerializer<Town> {
         gen.writeArrayFieldStart("plotGroups");
         for (PlotGroup group : town.getPlotGroups()) {
             gen.writeString(group.getName());
+        }
+        gen.writeEndArray();
+
+        gen.writeArrayFieldStart("residents");
+        for (Resident resident  : town.getResidents()) {
+            serializerFactory.getPartialResidentSerializer().serialize(resident, gen, provider);
         }
         gen.writeEndArray();
 

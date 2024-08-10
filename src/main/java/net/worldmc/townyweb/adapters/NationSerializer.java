@@ -10,13 +10,15 @@ import java.io.IOException;
 
 public class NationSerializer extends StdSerializer<Nation> {
     private static final Partial partial = new Partial();
+    private final SerializerFactory serializerFactory;
 
-    public NationSerializer() {
-        this(null);
+    public NationSerializer(SerializerFactory serializerFactory) {
+        this(null, serializerFactory);
     }
 
-    public NationSerializer(Class<Nation> t) {
+    public NationSerializer(Class<Nation> t, SerializerFactory serializerFactory) {
         super(t);
+        this.serializerFactory = serializerFactory;
     }
 
     public static class Partial extends StdSerializer<Nation> {
@@ -73,15 +75,21 @@ public class NationSerializer extends StdSerializer<Nation> {
         gen.writeNumberField("z", nation.getSpawnOrNull() != null ? nation.getSpawnOrNull().getZ() : 0);
         gen.writeEndObject();
 
+        gen.writeArrayFieldStart("towns");
+        for (Town town : nation.getTowns()) {
+            serializerFactory.getPartialTownSerializer().serialize(town, gen, provider);
+        }
+        gen.writeEndArray();
+
         gen.writeArrayFieldStart("allies");
         for (Nation ally : nation.getAllies()) {
-            partial.serialize(ally, gen, provider);
+            serializerFactory.getPartialNationSerializer().serialize(ally, gen, provider);
         }
         gen.writeEndArray();
 
         gen.writeArrayFieldStart("enemies");
         for (Nation enemy : nation.getEnemies()) {
-            partial.serialize(enemy, gen, provider);
+            serializerFactory.getPartialNationSerializer().serialize(enemy, gen, provider);
         }
         gen.writeEndArray();
 

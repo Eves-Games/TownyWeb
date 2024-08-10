@@ -9,14 +9,16 @@ import net.worldmc.townyweb.utils.SerializerFactory;
 import java.io.IOException;
 
 public class ResidentSerializer extends StdSerializer<Resident> {
-    private static final ResidentSerializer.Partial partial = new Partial();
+    private static final Partial partial = new Partial();
+    private final SerializerFactory serializerFactory;
 
-    public ResidentSerializer() {
-        this(null);
+    public ResidentSerializer(SerializerFactory serializerFactory) {
+        this(null, serializerFactory);
     }
 
-    public ResidentSerializer(Class<Resident> t) {
+    public ResidentSerializer(Class<Resident> t, SerializerFactory serializerFactory) {
         super(t);
+        this.serializerFactory = serializerFactory;
     }
 
     public static class Partial extends StdSerializer<Resident> {
@@ -95,13 +97,13 @@ public class ResidentSerializer extends StdSerializer<Resident> {
         Town town = resident.getTownOrNull();
         if (town != null) {
             gen.writeFieldName("town");
-            SerializerFactory.getInstance().getPartialTownSerializer().serialize(town, gen, provider);
+            serializerFactory.getPartialTownSerializer().serialize(town, gen, provider);
         }
 
         Nation nation = resident.getNationOrNull();
         if (nation != null) {
             gen.writeFieldName("nation");
-            SerializerFactory.getInstance().getPartialNationSerializer().serialize(nation, gen, provider);
+            serializerFactory.getPartialNationSerializer().serialize(nation, gen, provider);
         }
 
         gen.writeObjectFieldStart("jailStatus");
