@@ -5,14 +5,13 @@ import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.Javalin;
+import io.javalin.http.HttpResponseException;
 import net.worldmc.townyweb.utils.SerializerFactory;
 import net.worldmc.townyweb.routes.Nations;
 import net.worldmc.townyweb.routes.Residents;
 import net.worldmc.townyweb.routes.Towns;
 import net.worldmc.townyweb.utils.PaginationUtil;
 import org.bukkit.configuration.file.FileConfiguration;
-
-import static com.palmergames.bukkit.towny.TownySettings.getConfig;
 
 public class WebServer {
     private final SerializerFactory serializerFactory;
@@ -40,14 +39,14 @@ public class WebServer {
             config.useVirtualThreads = true;
         }).start(port);
 
-        /**app.before(ctx -> {
-         if (!apiKey.isEmpty()) {
-         String requestApiKey = ctx.header("apiKey");
-         if (requestApiKey == null || !requestApiKey.equals(apiKey)) {
-         throw new HttpResponseException(401, "Unauthorized: Invalid API key");
-         };
-         };
-         });*/
+        app.before(ctx -> {
+            if (!apiKey.isEmpty()) {
+                String requestApiKey = ctx.header("apiKey");
+                if (requestApiKey == null || !requestApiKey.equals(apiKey)) {
+                    throw new HttpResponseException(401, "Unauthorized: Invalid API key");
+                };
+            };
+         });
 
         Nations nations = new Nations(this);
         Towns towns = new Towns(this);
