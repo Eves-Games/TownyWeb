@@ -2,7 +2,6 @@ package net.worldmc.townyweb.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
@@ -19,18 +18,18 @@ public class Towns {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
     private final PaginationUtil<Town> townPaginationUtil;
-    private final PaginationUtil<Resident> residentPaginationUtil;
 
     public Towns(WebServer webServer) {
         SerializerFactory serializerFactory = webServer.getSerializerFactory();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
         this.townPaginationUtil = webServer.getTownPaginationUtil();
-        this.residentPaginationUtil = webServer.getResidentPaginationUtil();
     }
 
-    private Town getTownByUUID(String uuidParam) {
-        if (uuidParam == null || uuidParam.isEmpty()) {
+    public void getTown(Context ctx) {
+        String uuidParam = ctx.pathParam("uuid");
+
+        if (uuidParam.isEmpty()) {
             throw new HttpResponseException(400, "Required path parameter 'uuid' is missing.");
         }
 
@@ -46,12 +45,6 @@ public class Towns {
             throw new HttpResponseException(404, "Town not found");
         }
 
-        return town;
-    }
-
-    public void getTown(Context ctx) {
-        String uuidParam = ctx.pathParam("uuid");
-        Town town = getTownByUUID(uuidParam);
         ctx.json(fullObjectMapper.valueToTree(town));
     }
 
@@ -70,19 +63,6 @@ public class Towns {
         }
 
         Map<String, Object> paginatedResult = townPaginationUtil.paginateList(filteredTowns, page);
-        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
-
-        ctx.json(paginatedResult);
-    }
-
-    public void getTownResidents(Context ctx) {
-        String uuidParam = ctx.pathParam("uuid");
-        Town town = getTownByUUID(uuidParam);
-
-        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
-        List<Resident> allResidents = town.getResidents();
-
-        Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(allResidents, page);
         paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
         ctx.json(paginatedResult);

@@ -26,8 +26,10 @@ public class Residents {
         this.residentPaginationUtil = webServer.getResidentPaginationUtil();
     }
 
-    private Resident getResidentByUUID(String uuidParam) {
-        if (uuidParam == null || uuidParam.isEmpty()) {
+    public void getResident(Context ctx) {
+        String uuidParam = ctx.pathParam("uuid");
+
+        if (uuidParam.isEmpty()) {
             throw new HttpResponseException(400, "Required path parameter 'uuid' is missing.");
         }
 
@@ -43,12 +45,6 @@ public class Residents {
             throw new HttpResponseException(404, "Resident not found");
         }
 
-        return resident;
-    }
-
-    public void getResident(Context ctx) {
-        String uuidParam = ctx.pathParam("uuid");
-        Resident resident = getResidentByUUID(uuidParam);
         ctx.json(fullObjectMapper.valueToTree(resident));
     }
 
@@ -67,19 +63,6 @@ public class Residents {
         }
 
         Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(filteredResidents, page);
-        paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
-
-        ctx.json(paginatedResult);
-    }
-
-    public void getResidentFriends(Context ctx) {
-        String uuidParam = ctx.pathParam("uuid");
-        Resident resident = getResidentByUUID(uuidParam);
-
-        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
-        List<Resident> allFriends = resident.getFriends();
-
-        Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(allFriends, page);
         paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
         ctx.json(paginatedResult);
