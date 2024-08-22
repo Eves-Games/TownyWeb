@@ -5,9 +5,8 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
-import net.worldmc.townyweb.WebServer;
-import net.worldmc.townyweb.utils.SerializerFactory;
-import net.worldmc.townyweb.utils.PaginationUtil;
+import net.worldmc.townyweb.TownyWeb;
+import net.worldmc.townyweb.SerializerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -17,13 +16,12 @@ import java.util.stream.Collectors;
 public class Towns {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
-    private final PaginationUtil<Town> townPaginationUtil;
+    private final SerializerFactory serializerFactory;
 
-    public Towns(WebServer webServer) {
-        SerializerFactory serializerFactory = webServer.getSerializerFactory();
+    public Towns(TownyWeb townyWeb) {
+        this.serializerFactory = SerializerFactory.getInstance();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
-        this.townPaginationUtil = webServer.getTownPaginationUtil();
     }
 
     public void getTown(Context ctx) {
@@ -62,7 +60,7 @@ public class Towns {
                     .collect(Collectors.toList());
         }
 
-        Map<String, Object> paginatedResult = townPaginationUtil.paginateList(filteredTowns, page);
+        Map<String, Object> paginatedResult = serializerFactory.paginateList(filteredTowns, page);
         paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
         ctx.json(paginatedResult);

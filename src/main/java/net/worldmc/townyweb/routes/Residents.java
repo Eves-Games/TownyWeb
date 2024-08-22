@@ -5,9 +5,8 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
-import net.worldmc.townyweb.WebServer;
-import net.worldmc.townyweb.utils.SerializerFactory;
-import net.worldmc.townyweb.utils.PaginationUtil;
+import net.worldmc.townyweb.TownyWeb;
+import net.worldmc.townyweb.SerializerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -17,13 +16,12 @@ import java.util.stream.Collectors;
 public class Residents {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
-    private final PaginationUtil<Resident> residentPaginationUtil;
+    private final SerializerFactory serializerFactory;
 
-    public Residents(WebServer webServer) {
-        SerializerFactory serializerFactory = webServer.getSerializerFactory();
+    public Residents(TownyWeb townyWeb) {
+        this.serializerFactory = SerializerFactory.getInstance();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
-        this.residentPaginationUtil = webServer.getResidentPaginationUtil();
     }
 
     public void getResident(Context ctx) {
@@ -62,7 +60,7 @@ public class Residents {
                     .collect(Collectors.toList());
         }
 
-        Map<String, Object> paginatedResult = residentPaginationUtil.paginateList(filteredResidents, page);
+        Map<String, Object> paginatedResult = serializerFactory.paginateList(filteredResidents, page);
         paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
         ctx.json(paginatedResult);

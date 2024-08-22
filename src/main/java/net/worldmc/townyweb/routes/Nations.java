@@ -5,9 +5,8 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Nation;
 import io.javalin.http.Context;
 import io.javalin.http.HttpResponseException;
-import net.worldmc.townyweb.WebServer;
-import net.worldmc.townyweb.utils.PaginationUtil;
-import net.worldmc.townyweb.utils.SerializerFactory;
+import net.worldmc.townyweb.TownyWeb;
+import net.worldmc.townyweb.SerializerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -17,13 +16,12 @@ import java.util.stream.Collectors;
 public class Nations {
     private final ObjectMapper fullObjectMapper;
     private final ObjectMapper partialObjectMapper;
-    private final PaginationUtil<Nation> nationPaginationUtil;
+    private final SerializerFactory serializerFactory;
 
-    public Nations(WebServer webServer) {
-        SerializerFactory serializerFactory = webServer.getSerializerFactory();
+    public Nations(TownyWeb townyWeb) {
+        this.serializerFactory = SerializerFactory.getInstance();
         this.fullObjectMapper = serializerFactory.getFullObjectMapper();
         this.partialObjectMapper = serializerFactory.getPartialObjectMapper();
-        this.nationPaginationUtil = webServer.getNationPaginationUtil();
     }
 
     public void getNation(Context ctx) {
@@ -62,7 +60,7 @@ public class Nations {
                     .collect(Collectors.toList());
         }
 
-        Map<String, Object> paginatedResult = nationPaginationUtil.paginateList(filteredNations, page);
+        Map<String, Object> paginatedResult = serializerFactory.paginateList(filteredNations, page);
         paginatedResult.put("data", partialObjectMapper.valueToTree(paginatedResult.get("data")));
 
         ctx.json(paginatedResult);
