@@ -101,7 +101,7 @@ public class NationSerializer extends StdSerializer<Nation> {
 
         StringDataField bannerMetadata = (StringDataField) nation.getMetadata("banner");
         if (bannerMetadata != null) {
-            gen.writeStringField("bannerMeta", bannerMetadata.getValue());
+            gen.writeObjectField("bannerMeta", serializerFactory.getFullObjectMapper().readTree(bannerMetadata.getValue()));
         }
 
         gen.writeEndObject();

@@ -9,6 +9,7 @@ import net.worldmc.townyweb.adapters.BannerSerializer;
 import net.worldmc.townyweb.adapters.NationSerializer;
 import net.worldmc.townyweb.adapters.ResidentSerializer;
 import net.worldmc.townyweb.adapters.TownSerializer;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class SerializerFactory {
         fullModule.addSerializer(Nation.class, nationSerializer);
         fullModule.addSerializer(Town.class, townSerializer);
         fullModule.addSerializer(Resident.class, residentSerializer);
-        fullModule.addSerializer(BannerMeta.class, bannerSerializer);
+        fullModule.addSerializer(ItemStack.class, bannerSerializer);
         fullObjectMapper.registerModule(fullModule);
 
         SimpleModule partialModule = new SimpleModule();

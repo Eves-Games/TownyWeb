@@ -11,12 +11,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.worldmc.townyweb.TownyWeb;
 import net.worldmc.townyweb.SerializerFactory;
+import org.bukkit.Tag;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.jetbrains.annotations.NotNull;
 
 public class TownBannerCommand implements CommandExecutor {
@@ -47,11 +47,10 @@ public class TownBannerCommand implements CommandExecutor {
         }
 
         ItemStack heldItem = player.getInventory().getItemInMainHand();
-        if (!isBanner(heldItem)) {
+        if (!Tag.BANNERS.isTagged(heldItem.getType())) {
             player.sendMessage(NO_BANNER_MSG);
             return true;
         }
-        BannerMeta bannerMeta = (BannerMeta) heldItem.getItemMeta();
 
         Resident resident = TownyAPI.getInstance().getResident(player);
         assert resident != null;
@@ -59,7 +58,7 @@ public class TownBannerCommand implements CommandExecutor {
         assert town != null;
 
         try {
-            StringDataField bannerMetadata = new StringDataField(METADATA_KEY, getBannerNbtData(bannerMeta));
+            StringDataField bannerMetadata = new StringDataField(METADATA_KEY, fullObjectMapper.writeValueAsString(heldItem));
             town.addMetaData(bannerMetadata);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -68,13 +67,5 @@ public class TownBannerCommand implements CommandExecutor {
         TownyMessaging.sendPrefixedTownMessage(town, resident.getName() + " has changed the town banner.");
 
         return true;
-    }
-
-    private boolean isBanner(ItemStack item) {
-        return item != null && item.getType().name().endsWith("_BANNER");
-    }
-
-    private String getBannerNbtData(BannerMeta bannerMeta) throws JsonProcessingException {
-        return fullObjectMapper.writeValueAsString(bannerMeta);
     }
 }

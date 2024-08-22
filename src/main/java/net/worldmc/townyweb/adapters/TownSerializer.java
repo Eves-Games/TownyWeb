@@ -101,7 +101,7 @@ public class TownSerializer extends StdSerializer<Town> {
 
         StringDataField bannerMetadata = (StringDataField) town.getMetadata("banner");
         if (bannerMetadata != null) {
-            gen.writeStringField("bannerMeta", bannerMetadata.getValue());
+            gen.writeObjectField("bannerMeta", serializerFactory.getFullObjectMapper().readTree(bannerMetadata.getValue()));
         }
 
         gen.writeEndObject();
