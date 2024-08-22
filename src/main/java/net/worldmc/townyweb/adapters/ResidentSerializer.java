@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.palmergames.bukkit.towny.object.*;
-import net.worldmc.townyweb.utils.SerializerFactory;
+import net.worldmc.townyweb.SerializerFactory;
 
 import java.io.IOException;
 

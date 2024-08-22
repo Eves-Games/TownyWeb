@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.palmergames.bukkit.towny.object.*;
-import net.worldmc.townyweb.utils.SerializerFactory;
+import com.palmergames.bukkit.towny.object.metadata.StringDataField;
+import net.worldmc.townyweb.SerializerFactory;
 
 import java.io.IOException;
 
@@ -92,6 +93,16 @@ public class TownSerializer extends StdSerializer<Town> {
             serializerFactory.getPartialResidentSerializer().serialize(resident, gen, provider);
         }
         gen.writeEndArray();
+
+        StringDataField discordMetadata = (StringDataField) town.getMetadata("discordLink");
+        if (discordMetadata != null) {
+            gen.writeStringField("discordLink", discordMetadata.getValue());
+        }
+
+        StringDataField bannerMetadata = (StringDataField) town.getMetadata("banner");
+        if (bannerMetadata != null) {
+            gen.writeStringField("bannerMeta", bannerMetadata.getValue());
+        }
 
         gen.writeEndObject();
     }
