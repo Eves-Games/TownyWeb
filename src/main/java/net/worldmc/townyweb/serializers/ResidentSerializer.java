@@ -1,4 +1,4 @@
-package net.worldmc.townyweb.adapters;
+package net.worldmc.townyweb.serializers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

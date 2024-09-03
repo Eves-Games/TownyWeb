@@ -1,4 +1,4 @@
-package net.worldmc.townyweb.adapters;
+package net.worldmc.townyweb.serializers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -51,7 +51,6 @@ public class TownSerializer extends StdSerializer<Town> {
         gen.writeStringField("board", town.getBoard());
         gen.writeNumberField("registered", town.getRegistered());
         gen.writeStringField("founder", town.getFounder());
-        gen.writeNumberField("townBlocks", town.getNumTownBlocks());
         gen.writeBooleanField("isPublic", town.isPublic());
         gen.writeBooleanField("isNeutral", town.isNeutral());
         gen.writeBooleanField("isOpen", town.isOpen());
@@ -82,9 +81,26 @@ public class TownSerializer extends StdSerializer<Town> {
         gen.writeNumberField("z", town.getSpawnOrNull() != null ? town.getSpawnOrNull().getZ() : 0);
         gen.writeEndObject();
 
-        gen.writeArrayFieldStart("plotGroups");
-        for (PlotGroup group : town.getPlotGroups()) {
-            gen.writeString(group.getName());
+        gen.writeArrayFieldStart("townBlocks");
+        for (TownBlock townBlock : town.getTownBlocks()) {
+            gen.writeStartObject();
+            gen.writeStringField("name", townBlock.getName());
+            gen.writeStringField("type", townBlock.getTypeName());
+            gen.writeBooleanField("isHomeBlock", townBlock.isHomeBlock());
+            gen.writeNumberField("plotTax", townBlock.getPlotTax());
+
+            Resident resident = townBlock.getResidentOrNull();
+            if (resident != null) {
+                gen.writeFieldName("resident");
+                serializerFactory.getPartialResidentSerializer().serialize(resident, gen, provider);
+            }
+
+            gen.writeObjectFieldStart("coordinates");
+            gen.writeNumberField("x", townBlock.getX());
+            gen.writeNumberField("z", townBlock.getZ());
+            gen.writeEndObject();
+
+            gen.writeEndObject();
         }
         gen.writeEndArray();
 

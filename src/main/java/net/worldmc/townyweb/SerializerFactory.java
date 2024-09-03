@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
-import net.worldmc.townyweb.adapters.BannerSerializer;
-import net.worldmc.townyweb.adapters.NationSerializer;
-import net.worldmc.townyweb.adapters.ResidentSerializer;
-import net.worldmc.townyweb.adapters.TownSerializer;
+import net.worldmc.townyweb.serializers.BannerSerializer;
+import net.worldmc.townyweb.serializers.NationSerializer;
+import net.worldmc.townyweb.serializers.ResidentSerializer;
+import net.worldmc.townyweb.serializers.TownSerializer;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 
 import java.util.HashMap;
 import java.util.List;
