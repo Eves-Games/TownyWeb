@@ -11,7 +11,6 @@ import net.worldmc.townyweb.SerializerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Nations {
     private final ObjectMapper fullObjectMapper;
@@ -53,11 +52,11 @@ public class Nations {
         List<Nation> allNations = TownyAPI.getInstance().getNations();
 
         List<Nation> filteredNations = allNations;
-        if (searchQuery != null && !searchQuery.isEmpty()) {
+        if (searchQuery != null) {
             String lowerCaseSearch = searchQuery.toLowerCase();
             filteredNations = allNations.stream()
                     .filter(nation -> nation.getName().toLowerCase().contains(lowerCaseSearch))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         Map<String, Object> paginatedResult = serializerFactory.paginateList(filteredNations, page);

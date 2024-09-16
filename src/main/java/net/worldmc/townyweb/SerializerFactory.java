@@ -2,13 +2,11 @@ package net.worldmc.townyweb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.ghostchu.quickshop.api.shop.Shop;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
-import net.worldmc.townyweb.serializers.BannerSerializer;
-import net.worldmc.townyweb.serializers.NationSerializer;
-import net.worldmc.townyweb.serializers.ResidentSerializer;
-import net.worldmc.townyweb.serializers.TownSerializer;
+import net.worldmc.townyweb.serializers.*;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -30,6 +28,7 @@ public class SerializerFactory {
         this.nationSerializer = new NationSerializer(this);
         this.townSerializer = new TownSerializer(this);
         this.residentSerializer = new ResidentSerializer(this);
+        ShopSerializer shopSerializer = new ShopSerializer(this);
         BannerSerializer bannerSerializer = new BannerSerializer();
 
         this.fullObjectMapper = new ObjectMapper();
@@ -39,6 +38,7 @@ public class SerializerFactory {
         fullModule.addSerializer(Nation.class, nationSerializer);
         fullModule.addSerializer(Town.class, townSerializer);
         fullModule.addSerializer(Resident.class, residentSerializer);
+        fullModule.addSerializer(Shop.class, shopSerializer);
         fullModule.addSerializer(ItemStack.class, bannerSerializer);
         fullObjectMapper.registerModule(fullModule);
 

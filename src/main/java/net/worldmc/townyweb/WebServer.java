@@ -2,6 +2,7 @@ package net.worldmc.townyweb;
 
 import io.javalin.Javalin;
 import io.javalin.http.HttpResponseException;
+import net.worldmc.townyweb.routes.Shops;
 import net.worldmc.townyweb.routes.Nations;
 import net.worldmc.townyweb.routes.Residents;
 import net.worldmc.townyweb.routes.Towns;
@@ -39,6 +40,7 @@ public class WebServer {
         Nations nations = new Nations(townyWeb);
         Towns towns = new Towns(townyWeb);
         Residents residents = new Residents(townyWeb);
+        Shops shops = new Shops(townyWeb);
 
         app.get("/nations", nations::getNations);
         app.get("/nations/{uuid}", nations::getNation);
@@ -48,5 +50,7 @@ public class WebServer {
 
         app.get("/residents", residents::getResidents);
         app.get("/residents/{uuid}", residents::getResident);
+
+        app.get("/shops", shops::getShops);
     }
 }
