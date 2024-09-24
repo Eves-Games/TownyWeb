@@ -1,11 +1,7 @@
 package net.worldmc.townyweb.routes;
 
-import com.ghostchu.quickshop.api.QuickShopAPI;
-import com.ghostchu.quickshop.api.shop.Shop;
-import io.javalin.Javalin;
 import io.javalin.http.Context;
 import net.worldmc.townyweb.sets.Nations;
-import net.worldmc.townyweb.sets.Shops;
 import net.worldmc.townyweb.sets.Towns;
 import net.worldmc.townyweb.sets.Residents;
 import net.worldmc.townyweb.utils.PaginationUtil;
@@ -17,22 +13,11 @@ import com.palmergames.bukkit.towny.object.Resident;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TownyWebRoutes {
+import static net.worldmc.townyweb.WebServer.MAX_PAGE_SIZE;
 
-    private static final int MAX_PAGE_SIZE = 20;
-
-    public static void setupRoutes(Javalin app) {
-        app.get("/nations", TownyWebRoutes::getNations);
-        app.get("/nations/{uuid}", TownyWebRoutes::getNation);
-        app.get("/towns", TownyWebRoutes::getTowns);
-        app.get("/towns/{uuid}", TownyWebRoutes::getTown);
-        app.get("/residents", TownyWebRoutes::getResidents);
-        app.get("/residents/{uuid}", TownyWebRoutes::getResident);
-        app.get("/shops", TownyWebRoutes::getShops);
-    }
-
-    private static void getNations(Context ctx) {
-        String searchQuery = ctx.queryParam("search");
+public class Towny {
+    public static void getNations(Context ctx) {
+        String searchQuery = ctx.queryParam("query");
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
         int pageSize = Math.min(ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(10), MAX_PAGE_SIZE);
 
@@ -58,7 +43,7 @@ public class TownyWebRoutes {
         ctx.json(paginatedResult);
     }
 
-    private static void getNation(Context ctx) {
+    public static void getNation(Context ctx) {
         String uuidParam = ctx.pathParam("uuid");
         try {
             UUID uuid = UUID.fromString(uuidParam);
@@ -73,8 +58,8 @@ public class TownyWebRoutes {
         }
     }
 
-    private static void getTowns(Context ctx) {
-        String searchQuery = ctx.queryParam("search");
+    public static void getTowns(Context ctx) {
+        String searchQuery = ctx.queryParam("query");
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
         int pageSize = Math.min(ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(10), MAX_PAGE_SIZE);
 
@@ -100,7 +85,7 @@ public class TownyWebRoutes {
         ctx.json(paginatedResult);
     }
 
-    private static void getTown(Context ctx) {
+    public static void getTown(Context ctx) {
         String uuidParam = ctx.pathParam("uuid");
         try {
             UUID uuid = UUID.fromString(uuidParam);
@@ -115,8 +100,8 @@ public class TownyWebRoutes {
         }
     }
 
-    private static void getResidents(Context ctx) {
-        String searchQuery = ctx.queryParam("search");
+    public static void getResidents(Context ctx) {
+        String searchQuery = ctx.queryParam("query");
         int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
         int pageSize = Math.min(ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(10), MAX_PAGE_SIZE);
 
@@ -142,7 +127,7 @@ public class TownyWebRoutes {
         ctx.json(paginatedResult);
     }
 
-    private static void getResident(Context ctx) {
+    public static void getResident(Context ctx) {
         String uuidParam = ctx.pathParam("uuid");
         try {
             UUID uuid = UUID.fromString(uuidParam);
@@ -155,33 +140,5 @@ public class TownyWebRoutes {
         } catch (IllegalArgumentException e) {
             ctx.status(400).json(Map.of("error", "Invalid UUID format"));
         }
-    }
-
-    private static void getShops(Context ctx) {
-        String materialKey = ctx.queryParam("material");
-        int page = ctx.queryParamAsClass("page", Integer.class).getOrDefault(1);
-        int pageSize = Math.min(ctx.queryParamAsClass("pageSize", Integer.class).getOrDefault(10), MAX_PAGE_SIZE);
-
-        QuickShopAPI quickShopAPI = QuickShopAPI.getInstance();
-        List<Shop> allShops = new ArrayList<>(quickShopAPI.getShopManager().getAllShops());
-
-        List<Shop> filteredShops = allShops;
-        if (materialKey != null && !materialKey.isEmpty()) {
-            filteredShops = allShops.stream()
-                    .filter(shop -> shop.getItem().getType().getKey().getKey().equalsIgnoreCase(materialKey))
-                    .sorted(Comparator.comparingDouble(Shop::getPrice))
-                    .collect(Collectors.toList());
-        }
-
-        Map<String, Object> paginatedResult = PaginationUtil.paginateList(filteredShops, page, pageSize);
-
-        List<?> dataList = (List<?>) paginatedResult.get("data");
-        List<Map<String, Object>> shopMaps = dataList.stream()
-                .filter(item -> item instanceof Shop)
-                .map(item -> Shops.getShop((Shop) item))
-                .collect(Collectors.toList());
-
-        paginatedResult.put("data", shopMaps);
-        ctx.json(paginatedResult);
     }
 }
