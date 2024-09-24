@@ -6,9 +6,10 @@ import net.worldmc.townyweb.towny.commands.TownBannerCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.javalin.Javalin;
-import net.worldmc.townyweb.routes.TownyWebRoutes;
 
 import java.util.Map;
+
+import static net.worldmc.townyweb.WebServer.setupRoutes;
 
 public class TownyWeb extends JavaPlugin {
     @Override
@@ -38,7 +39,7 @@ public class TownyWeb extends JavaPlugin {
             }
         });
 
-        TownyWebRoutes.setupRoutes(app);
+        setupRoutes(app);
 
         app.start(port);
     }
