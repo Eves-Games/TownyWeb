@@ -55,7 +55,7 @@ public class Shops {
 
         Comparator<Shop> valueComparator = stockComparator.thenComparing(priceComparator);
 
-        if (sortOrder == null || "asc".equalsIgnoreCase(sortOrder)) {
+        if ("desc".equalsIgnoreCase(sortOrder)) {
             valueComparator = stockComparator.thenComparing(priceComparator.reversed());
         }
 
