@@ -39,6 +39,7 @@ public class Shops {
                     return true;
                 })
                 .filter(shop -> {
+                    if (!shop.isLoaded()) return false;
                     if (minPrice != null && shop.getPrice() < minPrice) return false;
                     if (maxPrice != null && shop.getPrice() > maxPrice) return false;
                     if (minStock != null && shop.getRemainingStock() < minStock) return false;
