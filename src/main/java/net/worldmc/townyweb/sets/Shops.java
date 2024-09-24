@@ -17,7 +17,7 @@ public class Shops {
         if (shop != null) {
             shopMap.put("name", shop.getShopName());
             shopMap.put("id", shop.getShopId());
-            shopMap.put("type", shop.getShopType().name());
+            shopMap.put("isBuying", shop.isBuying());
 
             Map<String, Integer> locationMap = new HashMap<>();
             locationMap.put("x", shop.getLocation().getBlockX());
