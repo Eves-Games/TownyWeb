@@ -1,6 +1,7 @@
 package net.worldmc.townyweb.sets;
 
 import com.ghostchu.quickshop.api.shop.Shop;
+import com.ghostchu.quickshop.api.shop.ShopType;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
@@ -16,6 +17,12 @@ public class Shops {
         if (shop != null) {
             shopMap.put("name", shop.getShopName());
             shopMap.put("id", shop.getShopId());
+            shopMap.put("type", shop.getShopType().name());
+
+            Map<String, Integer> locationMap = new HashMap<>();
+            locationMap.put("x", shop.getLocation().getBlockX());
+            locationMap.put("z", shop.getLocation().getBlockZ());
+            shopMap.put("location", locationMap);
 
             TownBlock townBlock = TownyAPI.getInstance().getTownBlock(shop.getLocation());
             if (townBlock != null) {
@@ -32,6 +39,7 @@ public class Shops {
             shopMap.put("amount", shop.getShopStackingAmount());
             shopMap.put("price", shop.getPrice());
             shopMap.put("stock", shop.getRemainingStock());
+            shopMap.put("space", shop.getRemainingSpace());
         }
 
         return shopMap;
