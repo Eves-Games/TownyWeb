@@ -17,7 +17,7 @@ public class Residents {
         if (resident != null) {
             partial.put("name", resident.getName());
             partial.put("UUID", resident.getUUID().toString());
-            partial.put("title", resident.getTitle());
+            partial.put("isOnline", resident.isOnline());
 
             if (resident.getTownOrNull() != null) {
                 partial.put("town", Towns.getPartialTown(resident.getTownOrNull()));
@@ -32,6 +32,7 @@ public class Residents {
 
         if (resident != null) {
             full.put("surname", resident.getSurname());
+            full.put("title", resident.getTitle());
             full.put("formattedName", resident.getFormattedName());
             full.put("formattedTitleName", resident.getFormattedTitleName());
             full.put("plotsCount", resident.getTownBlocks().size());
@@ -40,7 +41,6 @@ public class Residents {
             full.put("registered", resident.getRegistered());
             full.put("lastOnline", resident.getLastOnline());
             full.put("isNPC", resident.isNPC());
-            full.put("isOnline", resident.isOnline());
             full.put("isMayor", resident.isMayor());
             full.put("isKing", resident.isKing());
             full.put("isAdmin", resident.isAdmin());

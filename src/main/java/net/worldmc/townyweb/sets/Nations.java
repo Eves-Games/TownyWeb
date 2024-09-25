@@ -23,6 +23,7 @@ public class Nations {
         if (nation != null) {
             partial.put("name", nation.getName());
             partial.put("UUID", nation.getUUID().toString());
+            partial.put("numResidents", nation.getNumResidents());
 
             StringDataField bannerMetadata = (StringDataField) nation.getMetadata("banner");
             if (bannerMetadata != null) {
@@ -46,7 +47,6 @@ public class Nations {
             full.put("bankAccount", nation.getAccount().getCachedBalance());
             full.put("board", nation.getBoard());
             full.put("registered", nation.getRegistered());
-            full.put("numResidents", nation.getNumResidents());
             full.put("numTowns", nation.getNumTowns());
             full.put("numTownblocks", nation.getNumTownblocks());
             full.put("nationZoneSize", nation.getNationZoneSize());
