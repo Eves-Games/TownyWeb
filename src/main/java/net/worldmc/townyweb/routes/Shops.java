@@ -47,17 +47,21 @@ public class Shops {
                 })
                 .collect(Collectors.toList());
 
-        Comparator<Shop> stockComparator = Comparator.comparingInt((Shop shop) ->
-                shop.getRemainingStock() >= shop.getShopStackingAmount() ? 0 : 1);
 
-        Comparator<Shop> priceComparator = Comparator.comparingDouble(shop ->
-                shop.getPrice() / shop.getItem().getAmount());
+        Comparator<Shop> stockComparator = Comparator.comparing((Shop shop) -> shop.getRemainingStock() > 0);
+        Comparator<Shop> valueComparator = Comparator.comparingDouble((Shop shop) -> shop.getPrice() / shop.getItem().getAmount());
 
-        Comparator<Shop> valueComparator = stockComparator.thenComparing(priceComparator);
-
+        Comparator<Shop> compositeComparator;
         if ("desc".equalsIgnoreCase(sortOrder)) {
-            valueComparator = stockComparator.thenComparing(priceComparator.reversed());
+            compositeComparator = stockComparator
+                    .thenComparing(valueComparator.reversed())
+                    .reversed();
+        } else {
+            compositeComparator = stockComparator
+                    .thenComparing(valueComparator);
         }
+
+        filteredShops.sort(compositeComparator);
 
         filteredShops.sort(valueComparator);
 
