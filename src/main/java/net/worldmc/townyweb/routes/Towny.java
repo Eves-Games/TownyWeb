@@ -31,6 +31,8 @@ public class Towny {
                     .collect(Collectors.toList());
         }
 
+        filteredNations.sort((n1, n2) -> Integer.compare(n2.getNumResidents(), n1.getNumResidents()));
+
         Map<String, Object> paginatedResult = PaginationUtil.paginateList(filteredNations, page, pageSize);
 
         List<?> dataList = (List<?>) paginatedResult.get("data");
@@ -73,6 +75,8 @@ public class Towny {
                     .collect(Collectors.toList());
         }
 
+        filteredTowns.sort((t1, t2) -> Integer.compare(t2.getNumResidents(), t1.getNumResidents()));
+
         Map<String, Object> paginatedResult = PaginationUtil.paginateList(filteredTowns, page, pageSize);
 
         List<?> dataList = (List<?>) paginatedResult.get("data");
@@ -114,6 +118,8 @@ public class Towny {
                     .filter(resident -> resident.getName().toLowerCase().contains(lowerCaseSearch))
                     .collect(Collectors.toList());
         }
+
+        filteredResidents.sort(Comparator.comparing(Resident::isOnline).reversed());
 
         Map<String, Object> paginatedResult = PaginationUtil.paginateList(filteredResidents, page, pageSize);
 
